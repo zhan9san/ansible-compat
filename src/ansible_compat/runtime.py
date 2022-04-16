@@ -332,7 +332,9 @@ class Runtime:
         else:
             # no collection, try to recognize and install a standalone role
             destination = f"{self.cache_dir}/roles" if self.cache_dir else None
-            self._install_galaxy_role(self.project_dir, ignore_errors=True, destination=destination)
+            self._install_galaxy_role(
+                self.project_dir, ignore_errors=True, destination=destination
+            )
 
     def require_collection(  # noqa: C901
         self,
@@ -438,7 +440,11 @@ class Runtime:
             self._update_env("ANSIBLE_ROLES_PATH", roles_path)
 
     def _install_galaxy_role(
-        self, project_dir: str, role_name_check: int = 0, ignore_errors: bool = False, destination: Optional[Union[str, pathlib.Path]] = None
+        self,
+        project_dir: str,
+        role_name_check: int = 0,
+        ignore_errors: bool = False,
+        destination: Optional[Union[str, pathlib.Path]] = None,
     ) -> None:
         """Detect standalone galaxy role and installs it.
 
