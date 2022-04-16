@@ -331,10 +331,7 @@ class Runtime:
             self.install_collection_from_disk("../..", destination=destination)
         else:
             # no collection, try to recognize and install a standalone role
-            destination = f"{self.cache_dir}/roles" if self.cache_dir else None
-            self._install_galaxy_role(
-                self.project_dir, ignore_errors=True, destination=destination
-            )
+            self._install_galaxy_role(self.project_dir, ignore_errors=True)
 
     def require_collection(  # noqa: C901
         self,
@@ -439,12 +436,15 @@ class Runtime:
         if roles_path != self.config.default_roles_path:
             self._update_env("ANSIBLE_ROLES_PATH", roles_path)
 
+    def _get_roles_path(self) -> pathlib.Path:
+        if self.cache_dir:
+            path = pathlib.Path(f"{self.cache_dir}/roles")
+        else:
+            path = pathlib.Path(os.path.expanduser(self.config.default_roles_path[0]))
+        return path
+
     def _install_galaxy_role(
-        self,
-        project_dir: str,
-        role_name_check: int = 0,
-        ignore_errors: bool = False,
-        destination: Optional[Union[str, pathlib.Path]] = None,
+        self, project_dir: str, role_name_check: int = 0, ignore_errors: bool = False
     ) -> None:
         """Detect standalone galaxy role and installs it.
 
@@ -491,10 +491,7 @@ class Runtime:
                 fqrn = f"{role_namespace}{role_name}"
             else:
                 fqrn = pathlib.Path(project_dir).absolute().name
-        if destination:
-            path = pathlib.Path(destination)
-        else:
-            path = pathlib.Path(os.path.expanduser(self.config.default_roles_path[0]))
+        path = self._get_roles_path()
         path.mkdir(parents=True, exist_ok=True)
         link_path = path / fqrn
         # despite documentation stating that is_file() reports true for symlinks,
